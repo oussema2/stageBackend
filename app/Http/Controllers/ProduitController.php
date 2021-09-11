@@ -87,9 +87,9 @@ class ProduitController extends Controller
     }
 
 
-    public function addProduit(Request $req)
+    public function addProduct(Request $req)
     {
-        $val = Validator::make($req->all() , [
+        $val = Validator::make($req->all(), [
             "nom" => "required",
             "description" => "required",
             "quantite" => "required",
@@ -101,35 +101,34 @@ class ProduitController extends Controller
 
         if ($val->fails()) {
             return response([
-                "status" => 401 , 
+                "status" => 401,
                 "message" => $val->errors()
             ]);
-        }else {
+        } else {
             $produit = new produit();
             $produit->nom = $req->nom;
             $produit->description = $req->description;
             $produit->quantite = $req->quantite;
             $produit->prix = $req->prix;
-            $produit->image = $req->file('image')->store('produitImage',['disk' => 'public']);
+            $produit->image = $req->file('image')->store('produitImage', ['disk' => 'public']);
             $produit->idCatalogue = $req->idCatalogue;
             $catalogue = catalogue::find($req->idCatalogue);
             $catalogue->nombreProduit =   $catalogue->nombreProduit + 1;
-           
+
             $produit->save();
             $catalogue->save();
             return response([
-                "status" => 200, 
+                "status" => 200,
                 "data" => $produit,
                 "catalogue" => $catalogue
             ]);
-
         }
     }
 
 
-    public function updateProduit(Request $req , $id)
+    public function updateProduct(Request $req)
     {
-        $val = Validator::make($req->all() , [
+        $val = Validator::make($req->all(), [
             "nom" => "required",
             "description" => "required",
             "quantite" => "required",
@@ -141,41 +140,42 @@ class ProduitController extends Controller
 
         if ($val->fails()) {
             return response([
-                "status" => 401 , 
+                "status" => 401,
                 "message" => $val->errors()
             ]);
-        }else {
-            $produit =  produit::find($id);
+        } else {
+            $produit =  produit::find($req->id);
             $produit->nom = $req->nom;
             $produit->description = $req->description;
             $produit->quantite = $req->quantite;
             $produit->prix = $req->prix;
-            $produit->image = $req->file('image')->store('produitImage',['disk' => 'public']);
+            $produit->image = $req->file('image')->store('produitImage', ['disk' => 'public']);
             $produit->idCatalogue = $req->idCatalogue;
-           
-            $produit->save();
-           
-            return response([
-                "status" => 200, 
-                "data" => $produit,
-                
-            ]);
 
+            $produit->save();
+
+            return response([
+                "status" => 200,
+                "data" => $produit,
+
+            ]);
         }
     }
 
-    public function deleteProduit($id)
+    public function deleteProduct(Request $req)
     {
-            return produit::find($id)->delete();
+        return produit::find($req->id)->delete();
     }
 
 
 
-    public function getProduit($numPage)
+    public function getProduct(Request $req)
     {
+
+        $numPage =  $req->numPage;
         $prod = DB::table('produits')->skip($numPage * 10)->take(10)->get();
         return response([
-            "status"=> 200,
+            "status" => 200,
             "data" => $prod
         ]);
     }

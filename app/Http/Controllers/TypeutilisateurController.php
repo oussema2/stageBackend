@@ -89,21 +89,21 @@ class TypeutilisateurController extends Controller
     {
         $validator = Validator::make($req->all(), [
             'labeltype' => 'required',
-           
+
         ]);
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response([
-                'status'=>401,
+                'status' => 401,
                 'message' => $validator->errors()
- 
+
             ]);
-       }else {
-           $typeUser = new typeutilisateur();
-           $typeUser->labeltype = $req->labeltype;
-           $typeUser->numberUtilisateur = 0;
-           $typeUser->save();
-           return $typeUser;
-       }
+        } else {
+            $typeUser = new typeutilisateur();
+            $typeUser->labeltype = $req->labeltype;
+            $typeUser->numberUtilisateur = 0;
+            $typeUser->save();
+            return $typeUser;
+        }
     }
 
     public function getAllTypeUtilisateur()
@@ -111,15 +111,15 @@ class TypeutilisateurController extends Controller
         return typeutilisateur::all();
     }
 
-    public function deleteTypeUtilisateur($id)
+    public function deleteTypeUtilisateur(Request $req)
     {
-        return typeutilisateur::find($id)->delete();
+        return typeutilisateur::find($req->id)->delete();
     }
 
-    static function AddUtilisateurToType($id)
+    static function AddUtilisateurToType(Request $req)
     {
-        $typeUtilisateur = typeutilisateur::find($id);
-        $typeUtilisateur->numberUtilisateur =   $typeUtilisateur->numberUtilisateur + 1 ;
+        $typeUtilisateur = typeutilisateur::find($req->id);
+        $typeUtilisateur->numberUtilisateur =   $typeUtilisateur->numberUtilisateur + 1;
         $typeUtilisateur->save();
         return $typeUtilisateur;
     }

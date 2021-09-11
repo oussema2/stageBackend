@@ -88,11 +88,11 @@ class CatalogueController extends Controller
 
     public function addCatalogue(Request $req)
     {
-        $val = Validator::make($req->all() , [
+        $val = Validator::make($req->all(), [
             'nom' => 'required',
             'description' => "required",
             "icon" => "required",
-            
+
         ]);
 
         if ($val->fails()) {
@@ -100,41 +100,35 @@ class CatalogueController extends Controller
                 "status" => 401,
                 "message" => $val->errors()
             ]);
-
-        }else {
+        } else {
             $user = Auth::user();
-           
+
             $catalogue = new catalogue();
             $catalogue->nom = $req->nom;
             $catalogue->description = $req->description;
-            $catalogue->icon = $req->file('icon')->store('CatalogueIcon',['disk' => 'public']);
+            $catalogue->icon = $req->file('icon')->store('CatalogueIcon', ['disk' => 'public']);
             $catalogue->nombreProduit = 0;
             $catalogue->idUtilisateur = $user->id;
             $catalogue->save();
             return $catalogue;
-
-            
         }
     }
 
-    public function deleteCatalogue($id)
+    public function deleteCatalogue(Request $req)
     {
-       $res = DB::table('catalogues')->where("id" , $id)->delete();
-       $resProd = DB::table('produits')->where("idCatalogue" ,$id )->delete();
+        $res = DB::table('catalogues')->where("id", $req->id)->delete();
+        $resProd = DB::table('produits')->where("idCatalogue", $req->id)->delete();
 
-       return response([
-           "status" => 200,
-           "message" => "deleted" ,
-           "resCat" => $res , 
-           "resProd" => $resProd
-       ]);
+        return response([
+            "status" => 200,
+            "message" => "deleted",
+            "resCat" => $res,
+            "resProd" => $resProd
+        ]);
     }
 
     public function getCatalogues()
     {
         return catalogue::all();
     }
-
-    
-
 }
