@@ -46,4 +46,5 @@ Route::get("/getCatalogues", [CatalogueController::class, "getCatalogues"]);
 Route::post("/addProduct", [ProduitController::class, 'addProduct'])->middleware("auth:sanctum");
 Route::post('/updateProduct', [ProduitController::class, 'updateProduct'])->middleware("auth:sanctum");
 Route::delete('/deleteProduct', [ProduitController::class, 'deleteProduct'])->middleware("auth:sanctum");
-Route::get("/getProduts", [ProduitController::class, "getProduct"]);
+Route::get("/getProducts", [ProduitController::class, "getProducts"]);
+Route::get("/getProductsWithCategorie/{numPage}/{idCategorie}", [ProduitController::class, "getProductsWithCategorie"]);

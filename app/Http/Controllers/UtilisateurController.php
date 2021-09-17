@@ -90,75 +90,63 @@ class UtilisateurController extends Controller
 
     public function register(Request $req)
     {
-       $val = Validator::make($req->all() , [
-        'name' => 'required|max:20',
-        'email' =>'required|email',
-        'password' =>'min:6',
-        'dateDeNaissance' =>'required'
-       ]);
-
-       if ($val->fails()) {
-           return response ([
-               "status"=> 401, 
-               "messages" => $val->errors()
-           ]);
-       }else {
-           $utilisateur = new User();
-           $utilisateur->name = $req->name;
-           $utilisateur->email = $req->email;
-           $hashed = Hash::make($req->password, [
-            'rounds' => 12,
+        $val = Validator::make($req->all(), [
+            'name' => 'required|max:20',
+            'email' => 'required|email',
+            'password' => 'min:6',
+            'dateDeNaissance' => 'required'
         ]);
-           $utilisateur->password =  $hashed ;
-           $utilisateur->Idtype = 2;
-           $utilisateur->dateDeNaissance = $req->dateDeNaissance;
+
+        if ($val->fails()) {
+            return response([
+                "status" => 401,
+                "messages" => $val->errors()
+            ]);
+        } else {
+            $utilisateur = new User();
+            $utilisateur->name = $req->name;
+            $utilisateur->email = $req->email;
+            $hashed = Hash::make($req->password, [
+                'rounds' => 12,
+            ]);
+            $utilisateur->password =  $hashed;
+            $utilisateur->Idtype = 2;
+            $utilisateur->dateDeNaissance = $req->dateDeNaissance;
             $utilisateur->save();
-           return response([
-               "status"=> 200, 
-               "data"=>   $utilisateur
-           ]);
-       }
+            return response([
+                "status" => 200,
+                "data" =>   $utilisateur
+            ]);
+        }
     }
 
     public function logIn(Request $req)
     {
-        $val = Validator::make($req->all() , [
-           
-            'email' =>'required|email',
-            'password' =>'min:6',
-           
-           ]);
-        if ($val->fails()) {
+
+        $user =  User::where('email', $req->email)->first();
+        if (!$user || !Hash::check($req->password, $user->password)) {
             return response([
-                "status" => 401,
-                "message" => $val->errors()
+                'status' => 401,
+                'message' => 'Invalid Email OR Password'
+
             ]);
-        }else {
-            $user =  User::where('email' ,$req->email)->first();
-            if(!$user || !Hash::check($req->password , $user->password)){
-                return response([
-                    'status'=>401,
-                    'message' => 'Invalid Email OR Password'
-     
-                ]);
-            }else {
-                $token = $user->createToken($user->email.'_Token')->plainTextToken;
-               
-                $user->remember_token = $token;
-                $user->save() ; 
-                return response([
-                    'user' => $user,
-                    'token' => $token,
-                    'status' => 200,
-                    'message' => 'logged in',
-                ]);
-            }
+        } else {
+            $token = $user->createToken($user->email . '_Token')->plainTextToken;
+
+            $user->remember_token = $token;
+            $user->save();
+            return response([
+                'user' => $user,
+                'token' => $token,
+                'status' => 200,
+                'message' => 'logged in',
+            ]);
         }
     }
 
     public function updateProfile(Request $req)
     {
-     
+
         $id = Auth::user()->id;
         $user = User::find($id);
 
@@ -180,18 +168,14 @@ class UtilisateurController extends Controller
         $userX = request()->user();
         $id = Auth::user()->id;
         $user = User::find($id);
-      
+
         $userX->tokens()->where('tokenable_id', $user->id)->delete();
-        
+
         $user->remember_token = null;
         $user->save();
         return response([
-            "status"=> 200,
+            "status" => 200,
             "message" => "loggedOut"
         ]);
     }
-
-  
-
-    
 }

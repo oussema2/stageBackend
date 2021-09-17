@@ -169,14 +169,25 @@ class ProduitController extends Controller
 
 
 
-    public function getProduct(Request $req)
+    public function getProducts(Request $req)
     {
 
         $numPage =  $req->numPage;
-        $prod = DB::table('produits')->skip($numPage * 10)->take(10)->get();
+        $products = DB::table('produits')->skip($numPage * 10)->take(10)->get();
         return response([
             "status" => 200,
-            "data" => $prod
+            "data" => $products
+        ]);
+    }
+
+    public function getProductsWithCategorie($numPage, $idCategorie)
+    {
+
+
+        $products = DB::table('produits')->where("idCatalogue", $idCategorie)->skip($numPage * 10)->take(10)->get();
+        return response([
+            "status" => 200,
+            "data" => $products
         ]);
     }
 }

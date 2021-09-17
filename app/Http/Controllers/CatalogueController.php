@@ -129,6 +129,9 @@ class CatalogueController extends Controller
 
     public function getCatalogues()
     {
-        return catalogue::all();
+        return response([
+            "status" => 200,
+            "data" => catalogue::all()
+        ]);
     }
 }
