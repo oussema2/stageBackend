@@ -114,10 +114,10 @@ class CatalogueController extends Controller
         }
     }
 
-    public function deleteCatalogue(Request $req)
+    public function deleteCatalogue($id)
     {
-        $res = DB::table('catalogues')->where("id", $req->id)->delete();
-        $resProd = DB::table('produits')->where("idCatalogue", $req->id)->delete();
+        $res = DB::table('catalogues')->where("id", $id)->delete();
+        $resProd = DB::table('produits')->where("idCatalogue", $id)->delete();
 
         return response([
             "status" => 200,
@@ -130,8 +130,33 @@ class CatalogueController extends Controller
     public function getCatalogues()
     {
         return response([
+            "categorieNumber" => count(catalogue::all()),
             "status" => 200,
-            "data" => catalogue::all()
+            "categories" => catalogue::all()
+        ]);
+    }
+
+    public function getWithSearchNameCategorie($pattern, $numPage)
+    {
+        $categorieNumber = count(DB::table("catalogues")->where("nom", "LIKE", "%" . $pattern . "%")->get());
+        $categories = DB::table("catalogues")->where("nom", "LIKE", "%" . $pattern . "%")->skip($numPage * 10)->take(10)->get();
+        return   response([
+            "categorieNumber" => $categorieNumber,
+            "categories" => $categories,
+            "status" => 200,
+            "skipped" => $numPage
+        ]);
+    }
+
+    public function getCategorieInAdminSide($numPage)
+    {
+        $categorieNumber = count(catalogue::all());
+        $categories = DB::table('catalogues')->select("id", "nom", "description", "nombreProduit")->skip($numPage * 10)->take(10)->get();
+        return response([
+            "categorieNumber" => $categorieNumber,
+            "categories" => $categories,
+            "status" => 200,
+            "skipped" => $numPage
         ]);
     }
 }

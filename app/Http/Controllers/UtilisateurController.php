@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\catalogue;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Models\typeutilisateur;
+use Facade\FlareClient\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -87,6 +90,54 @@ class UtilisateurController extends Controller
     {
         //
     }
+    public function getUser()
+    {
+        $user = Auth::user();
+        $typeName = typeutilisateur::find($user->Idtype)->labeltype;
+        $user->typeLabel = $typeName;
+        return Response([
+            "user" => $user,
+            "status" => 200
+        ]);
+    }
+
+    public function deleteUser($id)
+    {
+        return User::find($id)->delete();
+    }
+
+
+    public function getSearchedUsers($pattern, $numPage)
+    {
+        $userNumber = count(DB::table("users")->where("name", "LIKE", "%" . $pattern . "%")->get());
+        $searchedUsers = DB::table("users")->where("name", "LIKE", "%" . $pattern . "%")->skip($numPage * 10)->take(10)->get();
+        return   response([
+            "userNumber" => $userNumber,
+            "users" => $searchedUsers,
+            "status" => 200,
+            "skipped" => $numPage
+        ]);
+    }
+    public function getUSerForAdmin($id)
+    {
+        return User::find($id);
+    }
+    /*  */
+    public function getUsersForAdmin($numPage)
+    {
+        $usersNumber = count(User::all());
+        $users = DB::table('users')->select("id", "name", "email", "Idtype", "dateDeNaissance")->skip($numPage * 10)->take(10)->get();
+        for ($i = 0; $i < count($users); $i++) {
+            $typeName = typeutilisateur::find($users[$i]->Idtype)->labeltype;
+            $users[$i]->Type = $typeName;
+        }
+        return response([
+            "userNumber" => $usersNumber,
+            "users" => $users,
+            "status" => 200,
+            "skipped" => $numPage
+        ]);
+    }
 
     public function register(Request $req)
     {
@@ -110,7 +161,7 @@ class UtilisateurController extends Controller
                 'rounds' => 12,
             ]);
             $utilisateur->password =  $hashed;
-            $utilisateur->Idtype = 2;
+            $utilisateur->Idtype = 1;
             $utilisateur->dateDeNaissance = $req->dateDeNaissance;
             $utilisateur->save();
             return response([
@@ -157,10 +208,13 @@ class UtilisateurController extends Controller
             'rounds' => 12,
         ]);
         $user->password = $hashed;
-        $user->name = $req->Idtype;
-        $user->name = $req->dateDeNaissance;
+        $user->Idtype = $user->Idtype;
+        $user->dateDeNaissance = $req->dateDeNaissance;
         $user->save();
-        return $user;
+        return response([
+            "user" => $user,
+            "status" => 200
+        ]);
     }
 
     public function logOut(Request $req)

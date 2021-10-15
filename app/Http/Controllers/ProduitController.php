@@ -93,7 +93,6 @@ class ProduitController extends Controller
             "nom" => "required",
             "description" => "required",
             "quantite" => "required",
-            "description" => "required",
             "prix" => "required",
             "image" => "required",
             "idCatalogue" => "required"
@@ -132,10 +131,9 @@ class ProduitController extends Controller
             "nom" => "required",
             "description" => "required",
             "quantite" => "required",
-            "description" => "required",
             "prix" => "required",
-            "image" => "required",
-            "idCatalogue" => "required"
+
+
         ]);
 
         if ($val->fails()) {
@@ -149,8 +147,7 @@ class ProduitController extends Controller
             $produit->description = $req->description;
             $produit->quantite = $req->quantite;
             $produit->prix = $req->prix;
-            $produit->image = $req->file('image')->store('produitImage', ['disk' => 'public']);
-            $produit->idCatalogue = $req->idCatalogue;
+
 
             $produit->save();
 
@@ -162,19 +159,26 @@ class ProduitController extends Controller
         }
     }
 
-    public function deleteProduct(Request $req)
+    public function deleteProduct($id)
     {
-        return produit::find($req->id)->delete();
+        return produit::find($id)->delete();
     }
 
+    public function getProduct($id)
+    {
+        $product = produit::find($id);
+        $product->labelCategorie = catalogue::find($product->idCatalogue)->nom;
+        return $product;
+    }
 
-
-    public function getProducts(Request $req)
+    public function getProducts($numpage)
     {
 
-        $numPage =  $req->numPage;
-        $products = DB::table('produits')->skip($numPage * 10)->take(10)->get();
+
+        $productsNumber = count(DB::table('produits')->get());
+        $products = DB::table('produits')->skip($numpage * 10)->take(10)->get();
         return response([
+            "productsNumber" => $productsNumber,
             "status" => 200,
             "data" => $products
         ]);
@@ -183,11 +187,41 @@ class ProduitController extends Controller
     public function getProductsWithCategorie($numPage, $idCategorie)
     {
 
-
+        $productsNumber = count(DB::table('produits')->where("idCatalogue", $idCategorie)->get());
         $products = DB::table('produits')->where("idCatalogue", $idCategorie)->skip($numPage * 10)->take(10)->get();
         return response([
+            "productsNumber" => $productsNumber,
             "status" => 200,
             "data" => $products
+        ]);
+    }
+    /* */
+    public function getPoductsInAdminSide($numPage)
+    {
+
+        $productsNumber = count(produit::all());
+        $products = DB::table('produits')->skip($numPage * 10)->select("id", "nom", "description", "quantite", "prix", "idCatalogue")->take(10)->get();
+        for ($i = 0; $i < count($products); $i++) {
+            $productTypeLabel = catalogue::find($products[$i]->idCatalogue)->nom;
+            $products[$i]->categorie = $productTypeLabel;
+        }
+        return response([
+            "productsNumber" => $productsNumber,
+            "products" => $products,
+            "status" => 200,
+            "skipped" => $numPage
+        ]);
+    }
+
+    public function getWithSearchName($pattern, $numPage)
+    {
+        $productsNumber = count(DB::table("produits")->where("nom", "LIKE", "%" . $pattern . "%")->get());
+        $searchedProducts = DB::table("produits")->where("nom", "LIKE", "%" . $pattern . "%")->skip($numPage * 10)->take(10)->get();
+        return   response([
+            "productsNumber" => $productsNumber,
+            "products" => $searchedProducts,
+            "status" => 200,
+            "skipped" => $numPage
         ]);
     }
 }
