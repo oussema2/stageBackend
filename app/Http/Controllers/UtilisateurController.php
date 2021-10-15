@@ -232,4 +232,11 @@ class UtilisateurController extends Controller
             "message" => "loggedOut"
         ]);
     }
+
+
+
+    public function FunctionName($i)
+    {
+        dd("oussema");
+    }
 }
