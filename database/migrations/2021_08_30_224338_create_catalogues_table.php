@@ -21,7 +21,7 @@ class CreateCataloguesTable extends Migration
             $table->integer('nombreProduit');
             $table->unsignedBigInteger("idUtilisateur");
 
-            $table->foreign('idUtilisateur')->references('id')->on('utilisateur');
+            $table->foreign('idUtilisateur')->references('id')->on('users');
 
             $table->timestamps();
         });
